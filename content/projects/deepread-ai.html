@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognition — Case Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0A0A;
+            --surface: #111111;
+            --border: #1E1E1E;
+            --text: #E8E3DA;
+            --muted: #6B6560;
+            --accent: #C9A84C;
+            --accent-dim: rgba(201, 168, 76, 0.12);
+            --tag-bg: rgba(201, 168, 76, 0.08);
+            --white: #F5F0E8;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            line-height: 1.75;
+            font-size: 17px;
+            overflow-x: hidden;
+        }
+
+        /* ── GRAIN OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        /* ── HEADER ── */
+        header {
+            padding: 80px 0 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 64px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+            margin-bottom: 48px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--tag-bg);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            padding: 4px 12px;
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(44px, 8vw, 72px);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 19px;
+            color: var(--muted);
+            font-weight: 300;
+            line-height: 1.6;
+            max-width: 580px;
+            margin-bottom: 40px;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .meta-value {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 400;
+        }
+
+        /* ── SECTIONS ── */
+        section {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(26px, 4vw, 34px);
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+        }
+
+        p {
+            color: var(--text);
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        strong {
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        /* ── PULL QUOTE ── */
+        .pull-quote {
+            margin: 40px 0;
+            padding: 28px 32px;
+            border-left: 2px solid var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .pull-quote p {
+            font-family: 'Playfair Display', serif;
+            font-size: 21px;
+            font-style: italic;
+            color: var(--white);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ── DECISION GRID ── */
+        .decisions {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 32px;
+        }
+
+        .decision {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .decision:hover {
+            border-color: rgba(201, 168, 76, 0.3);
+        }
+
+        .decision-what,
+        .decision-why {
+            padding: 18px 22px;
+            font-size: 15px;
+        }
+
+        .decision-what {
+            color: var(--white);
+            font-weight: 400;
+            border-right: 1px solid var(--border);
+        }
+
+        .decision-why {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .decision-header {
+            display: contents;
+        }
+
+        .decision-header .decision-what,
+        .decision-header .decision-why {
+            background: var(--surface);
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 12px 22px;
+        }
+
+        /* ── METRICS ── */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            margin-top: 32px;
+        }
+
+        .metric {
+            padding: 28px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .metric:hover {
+            border-color: rgba(201, 168, 76, 0.3);
+            background: rgba(201, 168, 76, 0.04);
+        }
+
+        .metric-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ── INSIGHT STRIP ── */
+        .insight-strip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 24px 28px;
+            margin: 36px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-strip::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
+        }
+
+        .insight-strip-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .insight-strip p {
+            font-size: 15px;
+            color: var(--text);
+            margin: 0;
+            line-height: 1.65;
+        }
+
+        /* ── LEARNING LIST ── */
+        .learnings {
+            list-style: none;
+            margin-top: 28px;
+        }
+
+        .learnings li {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 24px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .learnings li:last-child {
+            border-bottom: none;
+        }
+
+        .learning-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            padding-top: 3px;
+        }
+
+        .learning-text {
+            font-size: 15px;
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        .learning-text strong {
+            display: block;
+            color: var(--white);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 60px 0 80px;
+            text-align: center;
+        }
+
+        .footer-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-style: italic;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        .footer-line {
+            font-size: 13px;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── SCROLL PROGRESS ── */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: var(--accent);
+            width: 0%;
+            z-index: 1000;
+            transition: width 0.1s linear;
+        }
+
+        @media (max-width: 600px) {
+            .decisions {}
+
+            .decision {
+                grid-template-columns: 1fr;
+            }
+
+            .decision-what {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="container">
+
+        <header>
+            <a href="#" class="back-link">← Portfolio</a>
+
+            <div class="tag-row">
+                <span class="tag">Product Management</span>
+                <span class="tag">0 → 1</span>
+                <span class="tag">2026</span>
+            </div>
+
+            <h1>Cognition</h1>
+            <p class="subtitle">I didn't set out to build a blog. I set out to fix how people consume knowledge — and
+                stumbled onto a product while doing it.</p>
+
+            <div class="meta-row">
+                <div class="meta-item">
+                    <span class="meta-label">Product</span>
+                    <span class="meta-value">DeepRead AI</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Verticals</span>
+                    <span class="meta-value">AI · Finance · Health</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Stage</span>
+                    <span class="meta-value">Live — MVP</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Role</span>
+                    <span class="meta-value">Founder · PM · Builder</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── 01. THE OBSERVATION ── -->
+        <section>
+            <div class="section-label">01 — The Observation</div>
+            <h2>The problem wasn't attention spans. It was a broken format.</h2>
+            <p>I was using Gemini's deep research feature one afternoon. Instead of reading the usual wall of text, it
+                handed me something different — an interactive HTML page. Collapsible sections. Embedded charts. A
+                3,000-word report compressed into a focused 5-minute read.</p>
+            <p>I finished it. That almost never happens.</p>
+
+            <div class="pull-quote">
+                <p>"People haven't stopped wanting to learn. They've stopped tolerating formats that don't respect their
+                    time."</p>
+            </div>
+
+            <p>Blog readership is declining, but it's misdiagnosed. Publishers keep blaming TikTok and short attention
+                spans. The real culprit is a format that was designed for desktop reading in 2008 and hasn't changed
+                since. <strong>The format is the failure mode — not the reader.</strong></p>
+        </section>
+
+        <!-- ── 02. THE THINKING ── -->
+        <section>
+            <div class="section-label">02 — The Thinking</div>
+            <h2>I did PM in reverse — and it worked.</h2>
+            <p>Most product thinking goes: find a problem → build a solution. I went the other direction, and I'd do it
+                again.</p>
+
+            <div class="insight-strip">
+                <div class="insight-strip-label">The Method</div>
+                <p>I had a working solution — a format that demonstrably changed how people consumed information. So I
+                    reverse-engineered the problem it solved, then validated that the problem was real for others, not
+                    just me.</p>
+            </div>
+
+            <p>I sent the Gemini-style interactive blog to a small group of people. No pitch, no framing. I just watched
+                whether they finished reading. <strong>They did.</strong> That's a more honest signal than any survey.
+            </p>
+            <p>Small validation cohorts beat large indifferent ones. What matters isn't sample size — it's whether the
+                behavior you're betting on actually happened.</p>
+        </section>
+
+        <!-- ── 03. THE STRATEGY ── -->
+        <section>
+            <div class="section-label">03 — The Strategy</div>
+            <h2>Three niches. One audience. A monetization architecture.</h2>
+            <p>Niche selection is a capital allocation decision. Get it wrong and you don't just grow slowly — you
+                eliminate the business case. I chose <strong>AI & Technology, Finance, and Health</strong> — not because
+                they're trending, but because of two specific things:</p>
+            <p>First, the same person reads all three. The 24-year-old comparing LLM tools on Monday is researching
+                index funds on Thursday and tracking macros on the weekend. That's one reader, three touch points, one
+                platform.</p>
+            <p>Second — and this is the one most people miss — Finance and Health carry some of the highest advertising
+                CPMs on the open web. <strong>The niche selection is also the monetization architecture.</strong></p>
+
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">3×</div>
+                    <div class="metric-label">Audience cross-overlap</div>
+                    <div class="metric-sub">Same reader, all 3 verticals</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">2–3 min</div>
+                    <div class="metric-label">Target read time</div>
+                    <div class="metric-sub">vs. 10–15 min industry avg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">Top 3</div>
+                    <div class="metric-label">CPM verticals chosen</div>
+                    <div class="metric-sub">Finance · Health · Tech</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">Day 1</div>
+                    <div class="metric-label">Newsletter launched</div>
+                    <div class="metric-sub">Owned audience from the start</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 04. THE DECISIONS ── -->
+        <section>
+            <div class="section-label">04 — Decisions & Trade-offs</div>
+            <h2>Every decision had a cost. Here's what I accepted.</h2>
+            <p>Good product decisions aren't just about what you build — they're about what you knowingly give up. These
+                were mine.</p>
+
+            <div class="decisions">
+                <div class="decision decision-header">
+                    <div class="decision-what">Decision</div>
+                    <div class="decision-why">Why I accepted the trade-off</div>
+                </div>
+                <div class="decision">
+                    <div class="decision-what">200–500 word articles</div>
+                    <div class="decision-why">Completion rate over depth. A finished short article beats an abandoned
+                        long one every time.</div>
+                </div>
+                <div class="decision">
+                    <div class="decision-what">Launch multi-niche, not single</div>
+                    <div class="decision-why">Slower to own one category — but faster to grow total audience and reach
+                        monetization threshold.</div>
+                </div>
+                <div class="decision">
+                    <div class="decision-what">Newsletter from day zero</div>
+                    <div class="decision-why">Traffic is borrowed. An email list is owned. I wanted an audience I
+                        couldn't lose to an algorithm update.</div>
+                </div>
+                <div class="decision">
+                    <div class="decision-what">Format as the moat</div>
+                    <div class="decision-why">Content can be copied. A format that readers genuinely prefer is much
+                        harder to replicate at scale.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 05. WHAT I LEARNED ── -->
+        <section>
+            <div class="section-label">05 — What I Learned</div>
+            <h2>Four things this build made permanent in how I think.</h2>
+
+            <ul class="learnings">
+                <li>
+                    <span class="learning-num">01</span>
+                    <div class="learning-text">
+                        <strong>Format is a product decision</strong>
+                        How information is presented determines whether it's consumed at all. Most content products
+                        treat format as a design afterthought. It should be the first PM question.
+                    </div>
+                </li>
+                <li>
+                    <span class="learning-num">02</span>
+                    <div class="learning-text">
+                        <strong>Validation doesn't need scale — it needs honesty</strong>
+                        A handful of people with no incentive to flatter you is worth more than a thousand survey
+                        responses. Watch the behavior. The truth is in whether they finished.
+                    </div>
+                </li>
+                <li>
+                    <span class="learning-num">03</span>
+                    <div class="learning-text">
+                        <strong>Revenue architecture should be designed at day one</strong>
+                        Monetization retrofitted later is a product rebuilt from scratch. Every early decision — niche,
+                        format, email capture — was made with revenue pathway in mind.
+                    </div>
+                </li>
+                <li>
+                    <span class="learning-num">04</span>
+                    <div class="learning-text">
+                        <strong>Observed behavior is a faster path to insight than user interviews</strong>
+                        When a format demonstrably changes how real people consume information, the problem it solves is
+                        real — even before anyone has articulated it.
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ── FUTURE ── -->
+        <section>
+            <div class="section-label">06 — What's Next</div>
+            <h2>A blog is the front door. The ecosystem is the business.</h2>
+            <p>Cognition is built to be more than a content platform. The engaged reader base it builds becomes the
+                distribution layer for everything else — a PM interview prep tool, a habit tracker, personalized
+                AI-powered summaries on demand.</p>
+
+            <div class="pull-quote">
+                <p>"The content is the top of funnel. The ecosystem is the business."</p>
+            </div>
+
+            <p>Every project I build from here has a home to launch from. That was the plan from the beginning.</p>
+        </section>
+
+        <footer>
+            <p class="footer-title">Cognition · DeepRead AI</p>
+            <p class="footer-line">Built with conviction. Validated with behavior. Designed to scale.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (window.scrollY / total) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        });
+
+        // Intersection observer for section reveals
+        const sections = document.querySelectorAll('section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.08 });
+
+        sections.forEach(s => observer.observe(s));
+
+        // Stagger metric cards on entry
+        const metricsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const cards = entry.target.querySelectorAll('.metric');
+                    cards.forEach((c, i) => {
+                        setTimeout(() => {
+                            c.style.opacity = '1';
+                            c.style.transform = 'translateY(0)';
+                        }, i * 80);
+                    });
+                    metricsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.metrics').forEach(m => {
+            m.querySelectorAll('.metric').forEach(c => {
+                c.style.opacity = '0';
+                c.style.transform = 'translateY(12px)';
+                c.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            });
+            metricsObserver.observe(m);
+        });
+
+        // Header fade in on load
+        document.querySelector('header').style.cssText = 'opacity:0;transform:translateY(16px);transition:opacity 0.8s ease,transform 0.8s ease';
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                document.querySelector('header').style.cssText = 'opacity:1;transform:translateY(0);transition:opacity 0.8s ease,transform 0.8s ease';
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

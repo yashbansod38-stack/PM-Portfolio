@@ -1,0 +1,13 @@
+---
+title: "Week 3 — Added Voice Interaction"
+publishedAt: "2024-03-24"
+summary: "Integrated Whisper API for voice-based answers in the interview gym."
+tags: ["Build Log"]
+---
+
+This week we heavily focused on reducing the friction of typing long responses in the AI Interview Gym. Real interviews are spoken, not typed. 
+
+**Progress:**
+- Migrated to OpenAI's Whisper API to transcribe audio on the fly.
+- Updated the React recorder component to stream audio chunks instead of waiting for full completion.
+- Decreased the latency of the feedback loop from 12s to roughly 4s.
