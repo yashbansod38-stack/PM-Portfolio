@@ -4,12 +4,13 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, Monitor, PlayCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 const slides = [
-  { id: 1, title: "AI Interview Gym Dashboard", type: "dashboard" },
-  { id: 2, title: "Anonymous Chat Interface", type: "analytics" },
-  { id: 3, title: "Growth Strategy Metrics", type: "workflow" },
-  { id: 4, title: "System Architecture Map", type: "architecture" },
+  { id: 1, title: "AI Interview Gym Dashboard", type: "dashboard", image: "/images/blog.png" },
+  { id: 2, title: "Anonymous Chat Interface", type: "analytics", image: "/images/blog.png" },
+  { id: 3, title: "Growth Strategy Metrics", type: "workflow", image: "/images/MapLead.png" },
+  { id: 4, title: "System Architecture Map", type: "architecture", image: "/images/blog.png" },
 ]
 
 export function HeroSlider() {
@@ -98,12 +99,13 @@ export function HeroSlider() {
             className="absolute inset-0 flex items-center justify-center p-6 lg:p-8"
           >
             {/* Visual Placeholder for Screenshots */}
-            <div className="w-full h-full rounded-xl border border-dashed border-border/60 bg-background flex flex-col items-center justify-center text-muted-foreground relative shadow-inner overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-tr from-muted/50 to-transparent pointer-events-none" />
-               <Monitor className="w-12 h-12 mb-4 opacity-30 text-foreground" />
-               <span className="text-sm font-medium z-10">Project Screenshot {slides[currentIndex].id}</span>
-               <span className="text-xs opacity-60 mt-2 z-10">Placeholder (Replace with actual image later)</span>
-            </div>
+            <Image
+              src={slides[currentIndex].image}
+              alt={slides[currentIndex].title}
+              fill
+              className="object-cover rounded-xl"
+              priority={currentIndex === 0}
+            />
           </motion.div>
         </AnimatePresence>
       </div>
